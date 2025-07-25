@@ -1,13 +1,20 @@
-# macro-toolkit-rs
+[package]
+name = "macro-toolkit"
+version = "0.1.0"
+edition = "2024"
+authors = ["Lut99"]
+repository = "https://github.com/Lut99/macro-toolkit-rs"
+license = "Apache-2.0"
+description = """
 A collection of procedural macros that generally help writing declarative macros.
 
 
-## Macros
+# Macros
 This crate provides the following macros:
 - `match_lit!()`: A helper macro that can further match `literal` tokens passed to declarative macros.
 
 
-## Usage
+# Usage
 To use this crate, simply add it to your workspace as a dependency:
 ```toml
 [dependency]
@@ -26,14 +33,41 @@ cargo doc --no-deps --open
 ```
 
 
-## Features
+# Features
 This crate has the following features:
 - `macro_lit`: Enables the compilation of the `macro_lit!()`-macro _(default)._
 
 
-## Contribution
+# Contribution
 Contributions to this crate are welcome! Simply [raise an issue](https://github.com/Lut99/macro-toolkit-rs/issues) or [create a PR](https://github.com/Lut99/macro-toolkit-rs/pulls).
 
 
-## License
+# License
 This crate is licensed under Apache 2.0. See [`LICENSE`](./LICENSE) for more information.
+"""
+
+
+[[test]]
+name = "match_lit"
+path = "tests/match_lit.rs"
+required-features = ["match_lit"]
+
+
+[lib]
+proc-macro = true
+
+
+[dependencies]
+proc-macro2 = { version = "1.0.0", optional = true }
+syn = { version = "2.0.0", default-features = false, optional = true }
+
+
+[features]
+default = ["match_lit"]
+
+match_lit = ["dep:proc-macro2", "dep:syn"]
+
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
