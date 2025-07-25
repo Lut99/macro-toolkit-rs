@@ -63,8 +63,10 @@ syn = { version = "2.0.0", default-features = false, optional = true }
 
 
 [features]
-default = ["match_lit"]
+default = ["all"]
+all = ["idents", "match_lit"]
 
+idents = []
 match_lit = ["dep:proc-macro2", "dep:syn"]
 
 

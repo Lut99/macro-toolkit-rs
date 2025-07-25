@@ -10,32 +10,7 @@ use std::iter::Peekable;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use syn::{Lit, LitBool};
 
-
-/***** HELPER FUNCTIONS *****/
-/// Generates a [`TokenStream`] encoding an error.
-pub fn error(span: Span, message: &str) -> TokenStream {
-    let mut res = TokenStream::new();
-    res.extend(With::span(
-        [
-            TokenTree::Punct(Punct::new(':', Spacing::Joint)),
-            TokenTree::Punct(Punct::new(':', Spacing::Alone)),
-            TokenTree::Ident(Ident::new("core", span)),
-            TokenTree::Punct(Punct::new(':', Spacing::Joint)),
-            TokenTree::Punct(Punct::new(':', Spacing::Alone)),
-            TokenTree::Ident(Ident::new("compile_error", span)),
-            TokenTree::Punct(Punct::new('!', Spacing::Alone)),
-            TokenTree::Group(Group::new(Delimiter::Parenthesis, {
-                let mut res = TokenStream::new();
-                res.extend([TokenTree::Literal(Literal::string(message))]);
-                res
-            })),
-        ],
-        span,
-    ));
-    res
-}
-
-
+use crate::utils::error2;
 
 
 /***** HELPERS *****/
@@ -141,7 +116,7 @@ impl Branches {
                     } else if sident == "false" {
                         Ok(Lit::Bool(LitBool { value: false, span: ident.span() }))
                     } else {
-                        return Err(error(ident.span(), "Expected a literal"));
+                        return Err(error2(ident.span(), "Expected a literal"));
                     }
                 },
 
@@ -149,9 +124,9 @@ impl Branches {
                 TokenTree::Group(g) if g.delimiter() == Delimiter::None => {
                     // Extract the only token
                     let mut stream = g.stream().into_iter();
-                    let tree: TokenTree = stream.next().ok_or_else(|| error(g.span(), "Expected a literal"))?;
+                    let tree: TokenTree = stream.next().ok_or_else(|| error2(g.span(), "Expected a literal"))?;
                     if stream.next().is_some() {
-                        return Err(error(g.span(), "Expected a literal"));
+                        return Err(error2(g.span(), "Expected a literal"));
                     }
 
                     // Try to parse *that*
@@ -159,7 +134,7 @@ impl Branches {
                 },
 
                 // Otherwise, it's BAD
-                _ => return Err(error(tree.span(), "Expected a literal")),
+                _ => return Err(error2(tree.span(), "Expected a literal")),
             }
         }
 
@@ -176,16 +151,16 @@ impl Branches {
                         state = State::Group(lit, group);
                         continue;
                     } else {
-                        return Err(error(tree.span(), "Expected match branches wrapped in `{}`"));
+                        return Err(error2(tree.span(), "Expected match branches wrapped in `{}`"));
                     }
                 },
 
-                State::Group(_, _) => return Err(error(tree.span(), "Expected nothing after the match branches")),
+                State::Group(_, _) => return Err(error2(tree.span(), "Expected nothing after the match branches")),
             }
         }
         match state {
             State::Group(lit, group) => Ok((lit, group)),
-            _ => Err(error(Span::mixed_site(), "Expected a literal and then match branches wrapped in `{}`")),
+            _ => Err(error2(Span::mixed_site(), "Expected a literal and then match branches wrapped in `{}`")),
         }
     }
 }
@@ -215,19 +190,19 @@ impl Branch {
         // Match on the specific identifier on the head
         let ident: Ident = match iter.next() {
             Some(TokenTree::Ident(ident)) => ident,
-            Some(tt) => return Err(error(tt.span(), "Expected a match identifier")),
+            Some(tt) => return Err(error2(tt.span(), "Expected a match identifier")),
             None => return Ok(None),
         };
         // Match the `=>`
         match iter.next() {
             Some(TokenTree::Punct(punct)) if punct.as_char() == '=' && punct.spacing() == Spacing::Joint => {},
-            Some(punct) => return Err(error(punct.span(), "Expected '=>'")),
-            None => return Err(error(Span::mixed_site(), "Expected '=>'")),
+            Some(punct) => return Err(error2(punct.span(), "Expected '=>'")),
+            None => return Err(error2(Span::mixed_site(), "Expected '=>'")),
         }
         match iter.next() {
             Some(TokenTree::Punct(punct)) if punct.as_char() == '>' && punct.spacing() == Spacing::Alone => {},
-            Some(punct) => return Err(error(punct.span(), "Expected '=>'")),
-            None => return Err(error(Span::mixed_site(), "Expected '=>'")),
+            Some(punct) => return Err(error2(punct.span(), "Expected '=>'")),
+            None => return Err(error2(Span::mixed_site(), "Expected '=>'")),
         }
         // Match until a `,` OR the end
         let mut tokens = TokenStream::new();
@@ -396,7 +371,7 @@ impl LitMatcher {
             "cstring" => Ok(Self::StringCStr),
 
             // Any others are invalid
-            _ => Err(error(ident.span(), &format!("Expected a specific literal identifier"))),
+            _ => Err(error2(ident.span(), &format!("Expected a specific literal identifier"))),
         }
     }
 
@@ -477,5 +452,5 @@ pub fn match_lit(input: TokenStream) -> Result<TokenStream, TokenStream> {
     }
 
     // If we failed to match any, then error
-    Err(error(lit.span(), "Unmatched literal type"))
+    Err(error2(lit.span(), "Unmatched literal type"))
 }

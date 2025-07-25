@@ -44,8 +44,11 @@
 //
 
 // Modules
+#[cfg(feature = "idents")]
+mod idents;
 #[cfg(feature = "match_lit")]
 mod match_lit;
+mod utils;
 
 // Imports
 #[allow(unused)]
@@ -53,14 +56,28 @@ use proc_macro::TokenStream;
 
 
 /***** PROCEDURAL MACROS *****/
-#[doc = include_str!("../docs/match_lit.md")]
 #[cfg(feature = "match_lit")]
 #[cfg_attr(docsrs, doc(cfg(feature = "match_lit")))]
+#[doc = include_str!("../docs/match_lit.md")]
 #[inline]
 #[proc_macro]
 pub fn match_lit(input: TokenStream) -> TokenStream {
     match match_lit::match_lit(input.into()) {
         Ok(res) => res.into(),
         Err(err) => err.into(),
+    }
+}
+
+
+
+#[cfg(feature = "idents")]
+#[cfg_attr(docsrs, doc(cfg(feature = "idents")))]
+#[doc = include_str!("../docs/idents.md")]
+#[inline]
+#[proc_macro]
+pub fn idents(input: TokenStream) -> TokenStream {
+    match idents::idents(input) {
+        Ok(res) => res,
+        Err(err) => err,
     }
 }
