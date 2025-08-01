@@ -52,6 +52,11 @@ name = "match_lit"
 path = "tests/match_lit.rs"
 required-features = ["match_lit"]
 
+[[test]]
+name = "idents"
+path = "tests/idents.rs"
+required-features = ["idents"]
+
 
 [lib]
 proc-macro = true

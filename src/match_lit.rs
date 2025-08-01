@@ -7,7 +7,7 @@
 
 use std::iter::Peekable;
 
-use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, Ident, Spacing, Span, TokenStream, TokenTree};
 use syn::{Lit, LitBool};
 
 use crate::utils::error2;
