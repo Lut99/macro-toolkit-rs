@@ -48,7 +48,7 @@ fn test_idents_replace_named() {
         ($($values:expr),*) => {{
             idents! {
                 #[derive(Debug)]
-                struct Foo<{<...$($values),*>}>({<...$($values),*>});
+                struct Foo<{<A@...$($values),*>}>({<A@...$($values),*>});
                 Foo($($values),*)
             }
         }};

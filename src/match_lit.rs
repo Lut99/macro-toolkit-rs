@@ -13,31 +13,6 @@ use syn::{Lit, LitBool};
 use crate::utils::error2;
 
 
-/***** HELPERS *****/
-/// Abstractly sets properties on any [`proc_macro`] item.
-struct With<T>(std::marker::PhantomData<T>);
-impl<const LEN: usize> With<[TokenTree; LEN]> {
-    /// Sets the span of a list of arbitrary token trees.
-    ///
-    /// # Arguments
-    /// - `tts`: Some [`TokenTree`] to set the span of.
-    /// - `span`: A [`Span`] to set.
-    ///
-    /// # Returns
-    /// The given `tts`, but then spanned with the given `span`.
-    #[inline]
-    pub fn span(mut tts: [TokenTree; LEN], span: Span) -> [TokenTree; LEN] {
-        for tt in &mut tts {
-            tt.set_span(span);
-        }
-        tts
-    }
-}
-
-
-
-
-
 /***** TOKEN PARSING *****/
 /// Defines how to treat every possible literal type.
 struct Branches {
